@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7c657" />
+      <stop offset="50%" stop-color="#f7b23f" />
+      <stop offset="100%" stop-color="#e6a100" />
+    </linearGradient>
+    <filter id="drop-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur" />
+      <feOffset in="blur" dx="5" dy="5" result="offsetBlur" />
+      <feMerge>
+        <feMergeNode in="offsetBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <style>
+      text {
+        font-family: Arial, sans-serif;
+        font-size: 200px;
+        font-weight: bold;
+        fill: #ffffff;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+      .text-style {
+        font-family: 'Arial Black', Gadget, sans-serif;
+        font-size: 180px;
+        font-weight: bold;
+        letter-spacing: -5px;
+        fill: #ffffff;
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+    </style>
+  </defs>
+  <circle cx="300" cy="300" r="260" fill="url(#gradient)" filter="url(#drop-shadow)" />
+  <circle cx="300" cy="300" r="240" fill="#f7c657" />
+  <circle cx="300" cy="300" r="220" fill="#e6a100" />
+  <circle cx="300" cy="300" r="200" fill="#f7c657" />
+  <circle cx="300" cy="300" r="180" fill="#e6a100" />
+  <circle cx="300" cy="300" r="160" fill="#f7c657" />
+  <circle cx="300" cy="300" r="140" fill="#e6a100" />
+  <circle cx="300" cy="300" r="120" fill="#f7c657" />
+  <circle cx="300" cy="300" r="100" fill="#e6a100" />
+  <circle cx="300" cy="300" r="80" fill="#f7c657" />
+  <circle cx="300" cy="300" r="60" fill="#e6a100" />
+  <circle cx="300" cy="300" r="40" fill="#f7c657" />
+  <circle cx="300" cy="300" r="20" fill="#e6a100" />
+  <text x="300" y="300" class="text-style">NBC</text>
+
+  
+</svg>

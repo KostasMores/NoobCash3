@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Flask Form</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+      /* CSS styles for the coin animation */
+      .coin-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("/static/images/coin.svg") no-repeat center center fixed;
+        background-size: contain;
+        animation: spin 20s linear infinite;
+        transform-origin: center center;
+        z-index: -1;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    
+  </head>
+  <body>
+    <div class="coin-bg"></div>
+    <div class="container">
+      <form method="POST" action="http://192.168.1.9:5000/createTransaction">
+        <h1>Create Transaction</h1>
+        <div class="form-group">
+          <label for="field1">Recipient:</label>
+          <input type="text" id="field1" name="field1" placeholder="Enter recipients id">
+        </div>
+        <div class="form-group">
+          <label for="field2">Amount:</label>
+          <input type="text" id="field2" name="field2" placeholder="Enter amount (NBC)">
+        </div>
+        <div class="form-group">
+          <input type="submit" value="Submit">
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
