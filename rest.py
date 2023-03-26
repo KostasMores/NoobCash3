@@ -7,6 +7,7 @@ from block import Block
 from blockchain import BlockChain
 import base64
 import termcolor as co
+import threading
 
 master_url='http://192.168.1.9:5000'
 
@@ -43,12 +44,13 @@ def broadcastTransaction():
     # process the data here
     # flash('Transaction submitted', 'success')
     # return redirect(url_for('create_transaction_page'))
-    for id, value in myNode.ring:
+    for id, value in myNode.ring.items():
         if ('id'+str(value[0])) == field1:
             receiver = id.encode()
     T = myNode.create_transaction(receiver, int(field2))
     if T != None:
-        myNode.validate_transaction(T)
+        if myNode.validate_transaction(T):
+            myNode.add_transaction_to_pool(T)
         myNode.broadcast_transaction(T)
         return "Data received: Recipient -> {0}, Amount -> {1}".format(field1, field2)
     else:
@@ -100,6 +102,9 @@ def receiveBlockchain():
         if myNode.validate_chain(blockchain):
             myNode.chain = blockchain
             myNode.checkpoint = myNode.wallet.utxos.copy()
+
+            myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+            myNode.miner_thread.start()
         else:            
             print(co.colored("[ERROR]: Invalid Blockchain received from bootstrap",
                              'red'))
@@ -110,6 +115,8 @@ def receiveBlockchain():
 # This function should terminate the mining thread.
 @app.route('/broadcastBlock', methods=['POST'])
 def receive_block():
+    myNode.stop_event.set()
+    myNode.miner_thread.join()
     temp = json.loads((request.data).decode())
     prev_hash = temp['previousHash']
     ts = temp['timestamp']
@@ -140,19 +147,33 @@ def receive_block():
     # Reverse the transactions validated to go back to a good state
     # Put the transactions in the pool. If our block is the one received these
     # transactions will be invalidated the second time.
-    for trans in reversed(myNode.validated_transactions):
-        myNode.reverse_transaction(trans)
-        myNode.transaction_pool.insert(0, trans)
+    
 
-    flag = myNode.validate_block(block)
+    flag = myNode.run_block(block)
 
     if flag == -2:
+        if myNode.resolve_conflict:
+            print("[RESOLVE CONFLICT]: Your chain lost")
+        else:
+            print("[RESOLVE CONFLICT]: Your chain WON")
+        myNode.stop_event.clear()
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+        myNode.miner_thread.start()
         return 'This block does not refer to prev block resolve the conflict'
     elif flag == -1:
+        myNode.stop_event.clear()
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+        myNode.miner_thread.start()
         return 'Invalid Proof Of Work'
     elif flag == 0:
+        myNode.stop_event.clear()
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+        myNode.miner_thread.start()
         return 'Invalid Transaction Inside Block'
     elif flag == 1:
+        myNode.stop_event.clear()
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+        myNode.miner_thread.start()
         return 'Block is valid and has run update checkpoint'
     else:
         return "whadafuq"
@@ -174,11 +195,17 @@ def receiveTransaction():
     T = Transaction(sender_address, receiver_address, amount, inputs, signature=signature)
 
     if myNode.validate_transaction(T):
-        myNode.add_transaction_to_block(T)
+        myNode.add_transaction_to_pool(T)
 
     return temp
 
+@app.route('/consensus', methods=['GET'])
+def consensus():
+    chain = myNode.chain.to_dict()
+    length = len(myNode.chain.blocks)
+    to_send = {'chain' : chain, 'length': length}
 
+    return jsonify(to_send), 200
 if __name__ == '__main__':
     from argparse import ArgumentParser  
 
@@ -189,7 +216,8 @@ if __name__ == '__main__':
 
     myNode = node.Node(master=True, N=2)
     # print(myNode.wallet.public_key)
-
+    myNode.miner_thread = threading.Thread(target=myNode.mine_block())
+    myNode.miner_thread.start()
     # myBlock = myNode.create_new_block()
     
     app.run(host='192.168.1.9', port=port, debug=True)
