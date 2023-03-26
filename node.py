@@ -25,6 +25,8 @@ class Node:
             self.ring = {self.wallet.address.decode() : [0, '192.168.1.9']} # Yes I do <3
             gen_block = self.create_genesis_block()
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
+            gen_trans = self.chain.blocks[0].listOfTransactions[0]
+            self.wallet.utxos.append(gen_trans.transaction_outputs[1])        
         else:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
             self.validated_transactions = []
@@ -69,15 +71,20 @@ class Node:
                     
                 # If all nodes are present in the ring then
                 # send each node 100 NBC for entering (so generous ^^)
-                if self.N == self.id_count:
-                    for pk, _ in self.ring.items(): 
-                        transaction = self.create_transaction(receiver=pk.encode(),
-                                                            amount=100)
-                        for _, value in self.ring.items():
-                            ip_b = value[1]
-                            transaction_dic = transaction.to_dict()
-                            requests.post('http://'+ip_b+port+'/broadcastTransaction',
-                                        json = transaction_dic)
+                print("Here I am with self N: ")
+                print(self.N)
+                print("And id count:")
+                print(self.id_count)
+                if (self.N-1) == self.id_count:
+                    for pk, _ in self.ring.items():
+                        if pk.encode != self.wallet.address: 
+                            transaction = self.create_transaction(receiver=pk.encode(),
+                                                                amount=100)
+                            for _, value in self.ring.items():
+                                ip_b = value[1]
+                                transaction_dic = transaction.to_dict()
+                                requests.post('http://'+ip_b+port+'/broadcastTransaction',
+                                            json = transaction_dic)
         return
     
     def create_transaction(self, receiver, amount):

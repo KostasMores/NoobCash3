@@ -7,7 +7,7 @@ import jsonpickle
 
 class TransactionIO:
 
-    def __init__(self, transaction_id, address, amount, index):
+    def __init__(self, transaction_id, address, amount, index=''):
         self.address = address
         self.amount = amount
         self.transaction_id = transaction_id + index
