@@ -22,7 +22,7 @@ class Node:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
             self.validated_transactions = []
             self.wallet = self.create_wallet() # [To Do]: Rich people have big wallys
-            self.ring = {self.wallet.address.decode() : [0, '192.168.1.4']} # Yes I do <3
+            self.ring = {self.wallet.address.decode() : [0, '192.168.1.9']} # Yes I do <3
             gen_block = self.create_genesis_block()
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
         else:
@@ -58,7 +58,7 @@ class Node:
                 self.ring[public_key] = [self.id_count, ip]                
                 # Send the blockchain to the node registering
                 blockchain = self.chain.to_dict()
-                requests.post('http://'+ip_b+port+'/broadcastBlockchain',
+                requests.post('http://'+ip+port+'/broadcastBlockchain',
                               json=blockchain)
                 
                 # Broadcast the ring to everyone in the network

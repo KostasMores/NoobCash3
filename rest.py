@@ -105,6 +105,7 @@ def receiveBlockchain():
                              'red'))
             print(co.colored("Exiting ... SIKE",
                              'red'))
+        return 'Broadcast Blockchain'
 
 # This function should terminate the mining thread.
 @app.route('/broadcastBlock', methods=['POST'])
@@ -186,7 +187,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    myNode = node.Node()
+    myNode = node.Node(master=True, N=2)
     # print(myNode.wallet.public_key)
 
     # myBlock = myNode.create_new_block()
