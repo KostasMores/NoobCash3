@@ -326,12 +326,12 @@ class Node:
         return True
 
     def mine_block(self):
-        while not stop_event.is_set():
+        while not self.stop_event.is_set():
             # Add to transaction list transaction that can be validated with validutxos
             # Do not remove from pool unless you mine the block or is not currently valid.
             transaction_list = []
             utxos = self.wallet.validutxos.copy    
-            while not stop_event.is_set() and len(transaction_list) < CAPACITY:
+            while not self.stop_event.is_set() and len(transaction_list) < CAPACITY:
                 if self.transaction_pool != []:
                     t = self.transaction_pool[0]
                     if self.validate_pool_transaction(t):
@@ -341,7 +341,7 @@ class Node:
                         self.transaction_pool.remove(t)
             mining_block = self.create_new_block(self.chain.blocks[len(self.chain.blocks)-1].hash,
                                                 self.validated_transactions)
-            while not stop_event.is_set():
+            while not self.stop_event.is_set():
                 if self.valid_proof(mining_block.hash):
                     self.chain.add_block(mining_block)
                     for el in transaction_list:
