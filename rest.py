@@ -103,7 +103,7 @@ def receiveBlockchain():
             myNode.chain = blockchain
             myNode.checkpoint = myNode.wallet.utxos.copy()
 
-            myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+            myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
             myNode.miner_thread.start()
         else:            
             print(co.colored("[ERROR]: Invalid Blockchain received from bootstrap",
@@ -157,22 +157,22 @@ def receive_block():
         else:
             print("[RESOLVE CONFLICT]: Your chain WON")
         myNode.stop_event.clear()
-        myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
         myNode.miner_thread.start()
         return 'This block does not refer to prev block resolve the conflict'
     elif flag == -1:
         myNode.stop_event.clear()
-        myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
         myNode.miner_thread.start()
         return 'Invalid Proof Of Work'
     elif flag == 0:
         myNode.stop_event.clear()
-        myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
         myNode.miner_thread.start()
         return 'Invalid Transaction Inside Block'
     elif flag == 1:
         myNode.stop_event.clear()
-        myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+        myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
         myNode.miner_thread.start()
         return 'Block is valid and has run update checkpoint'
     else:
@@ -229,7 +229,7 @@ if __name__ == '__main__':
 
     myNode = node.Node(master=True, N=2)
     # print(myNode.wallet.public_key)
-    myNode.miner_thread = threading.Thread(target=myNode.mine_block)
+    myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
     myNode.miner_thread.start()
     # myBlock = myNode.create_new_block()
     
