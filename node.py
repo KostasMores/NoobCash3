@@ -30,7 +30,8 @@ class Node:
             gen_trans = self.chain.blocks[0].listOfTransactions[0]
             self.wallet.utxos.append(gen_trans.transaction_outputs[1])
             self.stop_event = threading.Event()
-            self.miner_thread = None        
+            self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
+            self.miner_thread.start()        
         else:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
             self.validated_transactions = []
