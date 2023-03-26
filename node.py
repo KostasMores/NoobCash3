@@ -107,7 +107,7 @@ class Node:
         return True
     
     def create_genesis_block(self):
-        genesis_transaction = Transaction(b'0', 100*self.N, [], None, signature=b'OoLaLa')
+        genesis_transaction = Transaction(b'0', self.wallet.address, 100*self.N, [], None, signature=b'OoLaLa')
         return Block('1', time.time(), nonce = 0, tlist = [genesis_transaction])
     
     # If the Transaction / Block / Chain is valid self.wallet.utxos will change accordingly
