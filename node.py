@@ -29,9 +29,9 @@ class Node:
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
             gen_trans = self.chain.blocks[0].listOfTransactions[0]
             self.wallet.utxos.append(gen_trans.transaction_outputs[1])
-            # self.stop_event = threading.Event()
-            # self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
-            # self.miner_thread.start()
+            self.stop_event = threading.Event()
+            self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
+            
         
         else:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
@@ -93,7 +93,7 @@ class Node:
                                 transaction_dic = transaction.to_dict()
                                 requests.post('http://'+ip_b+port+'/broadcastTransaction',
                                             json = transaction_dic)
-                    
+                    self.miner_thread.start()
         return
     
     def create_transaction(self, receiver, amount):
@@ -325,6 +325,11 @@ class Node:
                     res = True
             if res == False:
                 print(co.colored("[ERROR]: Miner Thread: UTXO input invalid", 'red'))
+                print(co.colored("/t/tThis transaction:"))
+                print(t_in)
+                print(co.colored("/t/tDid not match in this list:"))
+                for la in utxos:
+                    print(la)
                 return False
         return True
 
@@ -340,8 +345,8 @@ class Node:
                     if self.validate_pool_transaction(t, utxos):
                         transaction_list.append(t)                       
                     else:
-                        print(co.colored("[Miner]: Removing Transaction from pool", 'red'))
-                        self.transaction_pool.remove(t)
+                        print(co.colored("[Miner]: Not Removing Transaction from pool", 'red'))
+                        # self.transaction_pool.remove(t)
             mining_block = self.create_new_block(self.chain.blocks[-1].hash,
                                                 transaction_list)
             while not self.stop_event.is_set():
