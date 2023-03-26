@@ -218,6 +218,36 @@ def getBalance():
     # ret = str(balance)
     return str(balance)
 
+@app.route('/sendTransaction', methods=['GET', 'POST'])
+def make_transaction():
+    args = request.args
+    receiver_id = int(args.get('to'))
+    amount = int(args.get('amount'))
+    receiver = None
+    for pk,value in myNode.ring.items():
+        if value[0] == receiver_id:
+            receiver = pk
+    if(receiver == None):
+        print('Receiver not found!')
+    else:
+        T = myNode.create_transaction(receiver.encode(), amount)
+        if T != None:
+            if myNode.validate_transaction(T):
+                myNode.add_transaction_to_pool(T)
+            myNode.broadcast_transaction(T)
+
+    return 'sendTransactionPage'
+
+@app.route('/view', methods=['GET'])
+def view():
+    last_block = myNode.chain.blocks[len(myNode.chain.blocks)-1]
+    list_of_trans = last_block.listOfTransactions
+    for x in list_of_trans:
+        x.print_trans()
+
+    return jsonify(last_block.to_dict())
+
+
 if __name__ == '__main__':
     from argparse import ArgumentParser  
 

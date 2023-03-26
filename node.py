@@ -408,6 +408,7 @@ class Node:
         return False
 
     def to_chain(self, dict):
+
         chain = dict['chain']
 
         blocks = chain['blocks']
@@ -434,3 +435,43 @@ class Node:
         ret_chain = BlockChain(blocks=block_list, capacity=capacity)
 
         return ret_chain
+    
+
+    #cli commands
+    def balance():
+        url = 'http://' + my_ip + port + '/getBalance'
+        response = requests.get(url)
+        print('Your balance is :', response.text)
+        return response
+
+    def view():
+        url = 'http://' + my_ip + port + '/view'
+        response = requests.get(url)
+        re = response.json()
+        print('List of transaction of last block of blockchain')
+        print(re['listOfTransactions'])
+
+    def sendTransCli(id, amount):
+        url = 'http://' + my_ip + port + '/sendTransaction?to='+str(id)+'&amount='+str(amount)
+        # print(url)
+        response = requests.get(url)
+        if(response.status_code == 200):
+            print('Transcation is send!')
+        else:
+            print('Transaction was not send please repeat!')
+
+    def run_trans_from_txt(self):
+        project_path = "./"
+        time.sleep(5)
+        if self.id != 0: requests.get("http://" + my_ip  + port + "/login")
+        time.sleep(10)
+        f = open(project_path + "5nodes/transactions{}.txt".format(self.ring[self.wallet.address.decode()][0]), "r")
+        s = " "
+        s = f.readline()
+        while s != "":
+            [r, amount] = s.split()
+            rcv = r[2:]
+            # if int(rcv) >= total: continue
+            requests.get("http://" + my_ip  + port + "/sendTransaction?to=" + rcv + '&amount=' + amount)
+            time.sleep(3)
+            s = f.readline()
