@@ -101,7 +101,6 @@ def receiveBlockchain():
 
         if myNode.validate_chain(blockchain):
             myNode.chain = blockchain
-            myNode.checkpoint = myNode.wallet.utxos.copy()
 
             myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
             myNode.miner_thread.start()

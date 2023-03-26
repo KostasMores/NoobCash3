@@ -29,6 +29,7 @@ class Node:
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
             gen_trans = self.chain.blocks[0].listOfTransactions[0]
             self.wallet.utxos.append(gen_trans.transaction_outputs[1])
+            self.wallet.validutxos.append(gen_trans.transaction_outputs[1])
             self.stop_event = threading.Event()
             self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
             
