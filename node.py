@@ -29,9 +29,10 @@ class Node:
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
             gen_trans = self.chain.blocks[0].listOfTransactions[0]
             self.wallet.utxos.append(gen_trans.transaction_outputs[1])
-            self.stop_event = threading.Event()
-            self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
-            self.miner_thread.start()        
+            # self.stop_event = threading.Event()
+            # self.miner_thread = threading.Thread(target=self.mine_block, daemon=True)
+            # self.miner_thread.start()
+        
         else:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
             self.validated_transactions = []
@@ -92,6 +93,7 @@ class Node:
                                 transaction_dic = transaction.to_dict()
                                 requests.post('http://'+ip_b+port+'/broadcastTransaction',
                                             json = transaction_dic)
+                    
         return
     
     def create_transaction(self, receiver, amount):
@@ -331,17 +333,17 @@ class Node:
             # Add to transaction list transaction that can be validated with validutxos
             # Do not remove from pool unless you mine the block or is not currently valid.
             transaction_list = []
-            utxos = self.wallet.validutxos.copy    
-            while not self.stop_event.is_set() and len(transaction_list) < CAPACITY:
+            utxos = self.wallet.validutxos.copy()    
+            while not self.stop_event.is_set() and (len(transaction_list) < CAPACITY):
                 if self.transaction_pool != []:
                     t = self.transaction_pool[0]
-                    if self.validate_pool_transaction(t):
+                    if self.validate_pool_transaction(t, utxos):
                         transaction_list.append(t)                       
                     else:
                         print(co.colored("[Miner]: Removing Transaction from pool", 'red'))
                         self.transaction_pool.remove(t)
-            mining_block = self.create_new_block(self.chain.blocks[len(self.chain.blocks)-1].hash,
-                                                self.validated_transactions)
+            mining_block = self.create_new_block(self.chain.blocks[-1].hash,
+                                                transaction_list)
             while not self.stop_event.is_set():
                 if self.valid_proof(mining_block.hash):
                     self.chain.add_block(mining_block)

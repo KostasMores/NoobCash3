@@ -229,8 +229,6 @@ if __name__ == '__main__':
 
     myNode = node.Node(master=True, N=2)
     # print(myNode.wallet.public_key)
-    myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
-    myNode.miner_thread.start()
     # myBlock = myNode.create_new_block()
     
     app.run(host='192.168.1.9', port=port, debug=True)
