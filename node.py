@@ -202,13 +202,14 @@ class Node:
         self.wallet.utxos = []
         first_block = chain.blocks[0]
         gen_trans = first_block.listOfTransactions[0]
+        # print(gen_trans.transaction_outputs[1].toString())
         self.wallet.utxos.append(gen_trans.transaction_outputs[1])
         for block in chain.blocks[1:]:
             flag = self.validate_block(block)
             if flag != 1:
                 self.wallet.utxos = checkpoint
                 return False
-        self.validutxos = self.wallet.utxos.copy()
+        self.wallet.validutxos = self.wallet.utxos.copy()
         return True
     
     def run_transaction(self, transaction):
@@ -325,10 +326,10 @@ class Node:
                 if t_in.utxo_id == utxo.utxo_id:
                     res = True
             if res == False:
-                print(co.colored("[ERROR]: Miner Thread: UTXO input invalid", 'red'))
-                print(co.colored("/t/tThis transaction:"))
-                print(t_in)
-                print(co.colored("/t/tDid not match in this list:"))
+                # print(co.colored("[ERROR]: Miner Thread: UTXO input invalid", 'red'))
+                # print(co.colored("/t/tThis transaction:"))
+                # print(t_in)
+                # print(co.colored("/t/tDid not match in this list:"))
                 for la in utxos:
                     print(la)
                 return False
