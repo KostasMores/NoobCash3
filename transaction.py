@@ -3,6 +3,7 @@ from Crypto.Signature import pkcs1_15
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 import base64
+import jsonpickle
 
 class TransactionIO:
 
@@ -35,6 +36,12 @@ class Transaction:
             self.signature = self.sign_transaction(sender_private_key)
         else:
             self.signature = signature
+
+    def hash(self):
+        #calculate self.hash
+        tr_inputs = str(jsonpickle.encode(self.transaction_inputs))
+        block_to_byte = bytes(str(self.sender_address) + str(self.receiver_address) + str(self.amount) + tr_inputs, 'utf-8')
+        return SHA256.new(block_to_byte)
 
     def sign_transaction(self, sender_private_key):
         """

@@ -19,10 +19,10 @@ class Node:
             self.N = N
             self.id = 0
             self.id_count = 0
-            self.ring = {self.wallet.address.decode() : [0, '192.168.1.4']} # Yes I do <3
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
             self.validated_transactions = []
             self.wallet = self.create_wallet() # [To Do]: Rich people have big wallys
+            self.ring = {self.wallet.address.decode() : [0, '192.168.1.4']} # Yes I do <3
             gen_block = self.create_genesis_block()
             self.chain = BlockChain(blocks = [gen_block], capacity=CAPACITY) # [To Do]: Ohh kinky ;) 
         else:
@@ -107,7 +107,7 @@ class Node:
         return True
     
     def create_genesis_block(self):
-        genesis_transaction = Transaction(b'0', 100*self.N, [])
+        genesis_transaction = Transaction(b'0', 100*self.N, [], None, signature=b'OoLaLa')
         return Block('1', time.time(), nonce = 0, tlist = [genesis_transaction])
     
     # If the Transaction / Block / Chain is valid self.wallet.utxos will change accordingly
