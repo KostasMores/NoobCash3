@@ -206,6 +206,19 @@ def consensus():
     to_send = {'chain' : chain, 'length': length}
 
     return jsonify(to_send), 200
+
+@app.route('/printBlockchain', methods=['GET'])
+def print_blockchain():
+    str_chain = myNode.chain.to_dict()
+    return str_chain
+
+@app.route('/getBalance', methods=['GET', 'POST'])
+def getBalance():
+    balance = myNode.wallet.balance()
+    print(balance)
+    # ret = str(balance)
+    return str(balance)
+
 if __name__ == '__main__':
     from argparse import ArgumentParser  
 
