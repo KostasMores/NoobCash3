@@ -39,6 +39,8 @@ def createTransaction():
 
 @app.route('/createTransaction', methods=['POST'])
 def broadcastTransaction():
+    myNode.stop_event.set()
+    myNode.miner_thread.join()
     field1 = request.form['field1']
     field2 = request.form['field2']
     # process the data here
@@ -52,9 +54,13 @@ def broadcastTransaction():
         if myNode.validate_transaction(T):
             myNode.add_transaction_to_pool(T)
         myNode.broadcast_transaction(T)
-        return "Data received: Recipient -> {0}, Amount -> {1}".format(field1, field2)
+        ret = "Data received: Recipient -> {0}, Amount -> {1}".format(field1, field2)
     else:
-        return "Something went wrong :(" 
+        ret = "Something went wrong :(" 
+    myNode.stop_event.clear()
+    myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
+    myNode.miner_thread.start()
+    return ret
 
 # This method is only used at the beginning so entry nodes can get the
 # current ring from bootstrap node.
@@ -98,7 +104,8 @@ def receiveBlockchain():
         block_list.append(Block(prev_hash, ts, nonce=nonce, tlist=t_list))
 
         blockchain = BlockChain(block_list, capacity)
-
+        print("The blockchain received")
+        print(blockchain.to_dict())
         if myNode.validate_chain(blockchain):
             myNode.chain = blockchain
 

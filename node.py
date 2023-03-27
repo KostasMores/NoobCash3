@@ -69,6 +69,8 @@ class Node:
                 self.ring[public_key] = [self.id_count, ip]                
                 # Send the blockchain to the node registering
                 blockchain = self.chain.to_dict()
+                print(co.colored("[Blockchain]: Broadcasting ...", 'yellow'))
+                print(blockchain)
                 requests.post('http://'+ip+port+'/broadcastBlockchain',
                               json=blockchain)
                 
@@ -86,7 +88,7 @@ class Node:
                 print(self.id_count)
                 if (self.N-1) == self.id_count:
                     for pk, _ in self.ring.items():
-                        if pk.encode != self.wallet.address: 
+                        if pk.encode() != self.wallet.address: 
                             transaction = self.create_transaction(receiver=pk.encode(),
                                                                 amount=100)
                             for _, value in self.ring.items():
@@ -210,6 +212,9 @@ class Node:
                 self.wallet.utxos = checkpoint
                 return False
         self.wallet.validutxos = self.wallet.utxos.copy()
+        print("Utxos and valid utxos")
+        print(self.wallet.utxos)
+        print(self.wallet.validutxos)
         return True
     
     def run_transaction(self, transaction):
@@ -347,8 +352,9 @@ class Node:
                     if self.validate_pool_transaction(t, utxos):
                         transaction_list.append(t)                       
                     else:
-                        print(co.colored("[Miner]: Not Removing Transaction from pool", 'red'))
-                        # self.transaction_pool.remove(t)
+                        print(co.colored("[Miner]: Putting Transaction last in pool", 'red'))
+                        self.transaction_pool.remove(t)
+                        self.transaction_pool.append(t)
             mining_block = self.create_new_block(self.chain.blocks[-1].hash,
                                                 transaction_list)
             while not self.stop_event.is_set():
