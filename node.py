@@ -22,6 +22,7 @@ class Node:
             self.id = 0
             self.id_count = 0
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
+            self.sad_pool = [] # Here stray transactions will wait for their parents
             self.validated_transactions = []
             self.wallet = self.create_wallet() # [To Do]: Rich people have big wallys
             self.ring = {self.wallet.address.decode() : [0, '192.168.1.9']} # Yes I do <3
@@ -36,6 +37,7 @@ class Node:
         
         else:
             self.transaction_pool = []  # Here transactions will be accepted and provided with shelter and food no matter where they came from!
+            self.sad_pool = []
             self.validated_transactions = []
             self.wallet = self.create_wallet() # [To Do]: Rich people have big wallys
             self.chain = self.create_chain()   # [To Do]: Ohh kinky ;)
@@ -160,7 +162,9 @@ class Node:
                 if t_in.utxo_id == utxo.utxo_id:
                     res = True
             if res == False:
+                self.sad_pool.append(transaction)
                 print(co.colored("[ERROR]: UTXO input of sender does not exist", 'red'))
+                print(co.colored("\tTransaction is added to the sad pool :(", 'yellow'))
                 return False
         
         for t_out in outputs:
@@ -176,6 +180,7 @@ class Node:
             for t in temp:
                 if t_in.utxo_id == t.utxo_id:
                     self.wallet.utxos.remove(t)
+                    break
         
         # Then add to current utxos the outputs
         for t_out in outputs:
@@ -263,6 +268,7 @@ class Node:
             for t in temp:
                 if t_in.utxo_id == t.utxo_id:
                     self.wallet.validutxos.remove(t)
+                    break
         
         # Then add to current utxos the outputs
         for t_out in outputs:
@@ -356,9 +362,11 @@ class Node:
                     if self.validate_pool_transaction(t, utxos):
                         ############# Change UTXOS #################
                         for y in t.transaction_inputs:
-                            for utxo in utxos:
+                            temp = utxos.copy()
+                            for utxo in temp:
                                 if y.utxo_id == utxo.utxo_id:
                                     utxos.remove(utxo)
+                                    break
                         for yout in t.transaction_outputs:
                             utxos.append(yout)
                         ##############################
@@ -411,6 +419,7 @@ class Node:
             for t in temp:
                 if t_out.utxo_id == t.utxo_id:
                     self.wallet.utxos.remove(t)
+                    break
         
         for t_in in transaction_inputs:
             self.wallet.utxoslocal.append(t_in)

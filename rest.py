@@ -41,11 +41,11 @@ def registerNode():
     return '1'
 
 @app.route('/createTransaction', methods=['GET'])
-def createTransaction():
+def createTransactionweb():
     return render_template('createTransaction.html')
 
 @app.route('/createTransaction', methods=['POST'])
-def broadcastTransaction():
+def createTransactionformData():
     myNode.stop_event.set()
     myNode.miner_thread.join()
     field1 = request.form['field1']
@@ -199,6 +199,8 @@ def receive_block():
 # Bring your swimsuit :)
 @app.route('/broadcastTransaction', methods=['POST'])
 def receiveTransaction():
+    myNode.stop_event.set()
+    myNode.miner_thread.join()
     temp = json.loads((request.data).decode())
 
     signature = base64.b64decode(temp['signature'].encode())
@@ -211,7 +213,14 @@ def receiveTransaction():
 
     if myNode.validate_transaction(T):
         myNode.add_transaction_to_pool(T)
+        for crybabies in myNode.sad_pool:
+            if myNode.validate_transaction(crybabies):
+                myNode.add_transaction_to_pool(crybabies)
+                myNode.sad_pool.remove(crybabies)
 
+    myNode.stop_event.clear()
+    myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
+    myNode.miner_thread.start()
     return temp
 
 @app.route('/consensus', methods=['GET'])
@@ -284,6 +293,13 @@ def spamNode():
     myNode.miner_thread.start()
     return ret
 
+@app.route('/pool', methods=['GET'])
+def getPool():
+    l = []
+    for t in myNode.transaction_pool:
+        l.append(t.to_dict())
+    dic = {'pool' : l}
+    return jsonify(dic)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser  
