@@ -14,6 +14,13 @@ master_url='http://192.168.1.9:5000'
 app = Flask(__name__)
 app.secret_key = "your_secret_key_here"
 
+@app.route('/getUtxos', methods=['GET'])
+def getUtxos():
+    ret = {}
+    ret['local'] = [x.toString() for x in myNode.wallet.utxos]
+    ret['valid'] = [x.toString() for x in myNode.wallet.validutxos]
+    return jsonify(ret)
+
 @app.route('/login', methods=['GET'])
 def login():
     master = master_url + '/register'
@@ -52,6 +59,7 @@ def broadcastTransaction():
     T = myNode.create_transaction(receiver, int(field2))
     if T != None:
         if myNode.validate_transaction(T):
+            print(co.colored("[Transaction Validated]", 'light_green'))
             myNode.add_transaction_to_pool(T)
         myNode.broadcast_transaction(T)
         ret = "Data received: Recipient -> {0}, Amount -> {1}".format(field1, field2)

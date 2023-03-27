@@ -175,7 +175,7 @@ class Node:
         
         # Then add to current utxos the outputs
         for t_out in outputs:
-            if t_out.amount != 0:
+            if t_out.amount > 0:
                 self.wallet.utxos.append(t_out)
         
         return True
@@ -335,13 +335,13 @@ class Node:
                 # print(co.colored("/t/tThis transaction:"))
                 # print(t_in)
                 # print(co.colored("/t/tDid not match in this list:"))
-                for la in utxos:
-                    print(la)
+                # print('valid error: t_in: ', t_in.toString(),' utxos: ',[x.toString() for x in utxos])  
                 return False
         return True
 
     def mine_block(self):
         while not self.stop_event.is_set():
+            print(co.colored("[Mine started]", 'magenta'))
             # Add to transaction list transaction that can be validated with validutxos
             # Do not remove from pool unless you mine the block or is not currently valid.
             transaction_list = []
@@ -350,18 +350,34 @@ class Node:
                 if self.transaction_pool != []:
                     t = self.transaction_pool[0]
                     if self.validate_pool_transaction(t, utxos):
-                        transaction_list.append(t)                       
+                        ############# Change UTXOS #################
+                        for y in t.transaction_inputs:
+                            for utxo in utxos:
+                                if y.utxo_id == utxo.utxo_id:
+                                    utxos.remove(utxo)
+                        for yout in t.transaction_outputs:
+                            utxos.append(yout)
+                        ##############################
+                        transaction_list.append(t)
+                        self.transaction_pool.remove(t)                       
                     else:
                         print(co.colored("[Miner]: Putting Transaction last in pool", 'red'))
                         self.transaction_pool.remove(t)
                         self.transaction_pool.append(t)
+            if not self.stop_event.is_set():
+                print(co.colored("[Mine]: Creating block to mine", 'magenta'))
+            print(transaction_list)
+            if self.stop_event.is_set():
+                for tr in reversed(transaction_list):
+                    self.transaction_pool.insert(0, tr)
+            print(self.transaction_pool)
+
             mining_block = self.create_new_block(self.chain.blocks[-1].hash,
                                                 transaction_list)
             while not self.stop_event.is_set():
+                mining_block.hash = mining_block.myHash()
                 if self.valid_proof(mining_block.hash):
                     self.chain.add_block(mining_block)
-                    for el in transaction_list:
-                        self.transaction_pool.remove(el)
                     transaction_list = []
                     self.broadcast_block(mining_block)
                     break
