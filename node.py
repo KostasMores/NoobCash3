@@ -489,7 +489,7 @@ class Node:
 
     def run_trans_from_txt(self):
         project_path = "./"
-        time.sleep(15)
+        time.sleep(5)
         if self.id != 0: requests.get("http://" + my_ip  + port + "/login")
         time.sleep(15)
         f = open(project_path + "5nodes/transactions{}.txt".format(self.ring[self.wallet.address.decode()][0]), "r")
