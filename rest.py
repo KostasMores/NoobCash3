@@ -185,6 +185,7 @@ def receive_block():
         myNode.miner_thread.start()
         return 'Invalid Transaction Inside Block'
     elif flag == 1:
+        myNode.chain.add_block(block)
         myNode.stop_event.clear()
         myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
         myNode.miner_thread.start()
@@ -261,6 +262,27 @@ def view():
         x.print_trans()
 
     return jsonify(last_block.to_dict())
+
+@app.route('/spam', methods=['GET'])
+def spamNode():
+    myNode.stop_event.set()
+    myNode.miner_thread.join()
+    for id, _ in myNode.ring.items():
+        if id.encode() != myNode.wallet.address:
+            receiver = id.encode()
+    T = myNode.create_transaction(receiver, 1)
+    if T != None:
+        if myNode.validate_transaction(T):
+            print(co.colored("[Transaction Validated]", 'light_green'))
+            myNode.add_transaction_to_pool(T)
+        myNode.broadcast_transaction(T)
+        ret = "Data sent"
+    else:
+        ret = "Something went wrong :(" 
+    myNode.stop_event.clear()
+    myNode.miner_thread = threading.Thread(target=myNode.mine_block, daemon=True)
+    myNode.miner_thread.start()
+    return ret
 
 
 if __name__ == '__main__':

@@ -46,6 +46,10 @@ class Node:
             self.stop_event = threading.Event()
             self.miner_thread = None 
 
+
+        run_trans = threading.Thread(target=self.run_trans_from_txt, daemon=True)
+        run_trans.start()
+
     def add_transaction_to_pool(self, T):
         self.transaction_pool.append(T)
         return
@@ -341,7 +345,7 @@ class Node:
 
     def mine_block(self):
         while not self.stop_event.is_set():
-            print(co.colored("[Mine started]", 'magenta'))
+            print(co.colored("[Mine thread started]", 'magenta'))
             # Add to transaction list transaction that can be validated with validutxos
             # Do not remove from pool unless you mine the block or is not currently valid.
             transaction_list = []
@@ -378,6 +382,7 @@ class Node:
                 mining_block.hash = mining_block.myHash()
                 if self.valid_proof(mining_block.hash):
                     self.chain.add_block(mining_block)
+                    self.wallet.validutxos = utxos.copy()
                     transaction_list = []
                     self.broadcast_block(mining_block)
                     break
@@ -484,9 +489,9 @@ class Node:
 
     def run_trans_from_txt(self):
         project_path = "./"
-        time.sleep(5)
+        time.sleep(15)
         if self.id != 0: requests.get("http://" + my_ip  + port + "/login")
-        time.sleep(10)
+        time.sleep(15)
         f = open(project_path + "5nodes/transactions{}.txt".format(self.ring[self.wallet.address.decode()][0]), "r")
         s = " "
         s = f.readline()
