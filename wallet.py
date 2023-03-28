@@ -13,6 +13,9 @@ class Wallet:
 
     def balance(self):
         return sum([x.amount for x in self.utxos if x.address == self.address])
+    
+    def valid_balance(self):
+        return sum([x.amount for x in self.validutxos if x.address == self.address])
 		
 # Use valid utxos to hold utxos of current block in blockchain
 # Inorder to put transactions to mining block from valid pool we should check

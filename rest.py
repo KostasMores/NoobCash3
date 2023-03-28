@@ -213,7 +213,8 @@ def receiveTransaction():
 
     if myNode.validate_transaction(T):
         myNode.add_transaction_to_pool(T)
-        for crybabies in myNode.sad_pool:
+        temp1 = myNode.sad_pool.copy()
+        for crybabies in temp1:
             if myNode.validate_transaction(crybabies):
                 myNode.add_transaction_to_pool(crybabies)
                 myNode.sad_pool.remove(crybabies)
@@ -239,6 +240,13 @@ def print_blockchain():
 @app.route('/getBalance', methods=['GET', 'POST'])
 def getBalance():
     balance = myNode.wallet.balance()
+    print(balance)
+    # ret = str(balance)
+    return str(balance)
+
+@app.route('/getValidBalance', methods=['GET', 'POST'])
+def getValidBalance():
+    balance = myNode.wallet.valid_balance()
     print(balance)
     # ret = str(balance)
     return str(balance)
@@ -309,7 +317,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    myNode = node.Node(master=True, N=2)
+    myNode = node.Node(master=True, N=3)
     # print(myNode.wallet.public_key)
     # myBlock = myNode.create_new_block()
     

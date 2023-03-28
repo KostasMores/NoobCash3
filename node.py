@@ -302,7 +302,7 @@ class Node:
         gen_trans = first_block.listOfTransactions[0]
         self.wallet.validutxos.append(gen_trans.transaction_outputs[1])
         for block in chain.blocks[1:]:
-            flag = self.validate_block(block)
+            flag = self.run_block(block)
             if flag != 1:
                 self.wallet.validutxos = checkpoint
                 return False
@@ -498,6 +498,7 @@ class Node:
 
     def run_trans_from_txt(self):
         project_path = "./"
+        # Wait for app run to start
         time.sleep(5)
         if self.id != 0: requests.get("http://" + my_ip  + port + "/login")
         time.sleep(15)
